@@ -37,7 +37,68 @@ if (client.achievement.activate('ACHIEVEMENT')) {
 }
 ```
 
-You can refer to the [declarations file](https://github.com/ceifa/steamworks.js/blob/main/client.d.ts) to check the API support and get more detailed documentation of each function.
+You can refer to the [declarations file](./client.d.ts) to check the API support and get more detailed documentation of each function.
+
+## Workshop callbacks
+
+This fork adds `DownloadItemResult`, `ItemInstalled`, and
+`UserSubscribedItemsListChanged` to `SteamCallback`. Existing callback enum
+values are preserved. The SDK and Rust dependency revisions remain unchanged.
+
+New Workshop callback payloads keep all 64-bit IDs as **decimal strings**,
+including `published_file_id`, `legacy_content`, and `manifest_id`. Convert
+them with `BigInt(value)` when calling a native Workshop method. Existing
+callback payloads are unchanged. See `callbacks.d.ts` for their types.
+
+Register before downloading, filter by both app and item, and retain/disconnect
+the callback handle:
+
+```js
+const { init, SteamCallback } = require('steamworks.js');
+const appId = 480; // Replace with your game's App ID.
+const itemId = 1234567890n; // Replace with an accessible item for that app.
+const client = init(appId);
+
+const handle = client.callback.register(SteamCallback.DownloadItemResult, event => {
+    if (event.app_id !== appId || event.published_file_id !== itemId.toString()) return;
+    handle.disconnect();
+    if (event.result !== 1) {
+        console.error('Download failed:', event.result);
+        return;
+    }
+    console.log(client.workshop.installInfo(itemId));
+});
+
+if (!client.workshop.download(itemId, true)) {
+    handle.disconnect();
+    throw new Error('Steam rejected the download request');
+}
+```
+
+`download()` returning `true` means the request was accepted. Wait for the
+matching successful completion before accessing content, including content
+that was already installed. Apply an application timeout and disconnect on
+shutdown. `ItemInstalled` can trigger revalidation of installed content;
+`UserSubscribedItemsListChanged` identifies the app whose subscriptions should
+be reconciled. Callbacks use the existing client and callback pump.
+
+Offline validation after building:
+
+```sh
+npm run build
+npm run test:workshop
+```
+
+For a live test, configure Workshop for your own App ID, run Steam with an
+entitled account, and use an existing accessible item:
+
+```sh
+node test/workshop-download.js APP_ID ITEM_ID
+```
+
+The smoke test requests a download but does not upload, delete, or permanently
+subscribe. It filters events, enforces a timeout, and disconnects handles. A
+successful offline build does not establish live Workshop or overlay behavior.
 
 ## Installation
 

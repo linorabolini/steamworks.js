@@ -11,4 +11,5 @@ pub mod overlay;
 pub mod stats;
 pub mod utils;
 pub mod workshop;
+mod workshop_callbacks;
 pub mod workshop_item;

@@ -13,7 +13,29 @@ export const enum ChatMemberStateChange {
     Banned,
 }
 
+/** IDs are decimal strings so native JSON conversion cannot lose uint64 precision. */
+export interface WorkshopDownloadItemResult {
+    app_id: number
+    published_file_id: string
+    /** Steam EResult: 1 means success; unknown future result codes are preserved. */
+    result: number
+}
+
+export interface WorkshopItemInstalled {
+    app_id: number
+    published_file_id: string
+    legacy_content: string
+    manifest_id: string
+}
+
+export interface WorkshopUserSubscribedItemsListChanged {
+    app_id: number
+}
+
 export interface CallbackReturns {
+    [client.callback.SteamCallback.DownloadItemResult]: WorkshopDownloadItemResult
+    [client.callback.SteamCallback.ItemInstalled]: WorkshopItemInstalled
+    [client.callback.SteamCallback.UserSubscribedItemsListChanged]: WorkshopUserSubscribedItemsListChanged
     [client.callback.SteamCallback.PersonaStateChange]: {
         steam_id: bigint
         flags: { bits: number }
