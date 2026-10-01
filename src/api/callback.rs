@@ -7,6 +7,8 @@ pub mod callback {
         JsFunction,
     };
 
+    use crate::api::workshop_callbacks;
+
     #[napi]
     pub struct Handle {
         handle: Option<steamworks::CallbackHandle>,
@@ -34,6 +36,9 @@ pub mod callback {
         P2PSessionConnectFail,
         GameLobbyJoinRequested,
         MicroTxnAuthorizationResponse,
+        DownloadItemResult,
+        ItemInstalled,
+        UserSubscribedItemsListChanged,
     }
 
     #[napi(ts_generic_types = "C extends keyof import('./callbacks').CallbackReturns")]
@@ -77,6 +82,15 @@ pub mod callback {
             SteamCallback::MicroTxnAuthorizationResponse => {
                 register_callback::<steamworks::MicroTxnAuthorizationResponse>(threadsafe_handler)
             }
+            SteamCallback::DownloadItemResult => {
+                register_callback::<workshop_callbacks::DownloadItemResult>(threadsafe_handler)
+            }
+            SteamCallback::ItemInstalled => {
+                register_callback::<workshop_callbacks::ItemInstalled>(threadsafe_handler)
+            }
+            SteamCallback::UserSubscribedItemsListChanged => register_callback::<
+                workshop_callbacks::UserSubscribedItemsListChanged,
+            >(threadsafe_handler),
         };
 
         Handle {

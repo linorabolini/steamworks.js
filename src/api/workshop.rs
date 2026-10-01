@@ -380,7 +380,9 @@ pub mod workshop {
     /// Download or update a workshop item.
     ///
     /// @param highPriority - If high priority is true, start the download in high priority mode, pausing any existing in-progress Steam downloads and immediately begin downloading this workshop item.
-    /// @returns true or false
+    /// @returns true if the download request was accepted, not when it completes.
+    /// Register SteamCallback.DownloadItemResult before calling and wait for its
+    /// matching app/item result before accessing files, including installed items.
     ///
     /// {@link https://partner.steamgames.com/doc/api/ISteamUGC#DownloadItem}
     #[napi]
@@ -410,13 +412,13 @@ pub mod workshop {
     pub async fn delete_item(item_id: BigInt) -> Result<(), Error> {
         let client = crate::client::get_client();
         let (tx, rx) = oneshot::channel();
-    
+
         client
             .ugc()
             .delete_item(PublishedFileId(item_id.get_u64().1), |result| {
                 tx.send(result).unwrap();
             });
-    
+
         let result = rx.await.unwrap();
         match result {
             Ok(()) => Ok(()),

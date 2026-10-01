@@ -1,6 +1,6 @@
 {
     "name": "steamworks.js",
-    "version": "0.4.0",
+    "version": "0.4.1-workshop.0",
     "main": "index.js",
     "types": "index.d.ts",
     "napi": {
@@ -38,10 +38,13 @@
         "build:debug": "node build",
         "prune": "rimraf dist target client.d.ts",
         "format": "cargo clippy --fix --allow-staged && cargo fmt",
-        "types": "tsc index.js --allowJs --declaration --emitDeclarationOnly"
+        "types": "tsc index.js --allowJs --declaration --emitDeclarationOnly",
+        "test:types": "tsc --noEmit --strict --target es2020 --module commonjs test/typescript/workshop.ts test/typescript/index.ts",
+        "test:callbacks": "node test/workshop-bindings.js",
+        "test:workshop": "cargo test --locked --lib && npm run test:types && npm run test:callbacks"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/ceifa/steamworks.js"
+        "url": "https://github.com/linorabolini/steamworks.js"
     }
 }
