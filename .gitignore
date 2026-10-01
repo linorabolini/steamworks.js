@@ -6,3 +6,6 @@ test/electron/steamworks.js-electron-test-*
 
 sdk/*
 !sdk/redistributable_bin/
+
+# Local Workshop test state, uploaded IDs, and content snapshots
+.workshop-smoke/

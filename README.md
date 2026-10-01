@@ -100,6 +100,35 @@ The smoke test requests a download but does not upload, delete, or permanently
 subscribe. It filters events, enforces a timeout, and disconnects handles. A
 successful offline build does not establish live Workshop or overlay behavior.
 
+To create one private test item, prepare a local project outside source control:
+
+```sh
+node test/workshop-private-item.js prepare APP_ID .workshop-smoke/APP_ID
+node test/workshop-private-item.js upload APP_ID .workshop-smoke/APP_ID
+```
+
+The helper generates a known probe file and a small PNG preview, saves the
+created item ID before uploading, and always submits with Private visibility.
+Rerunning `upload` updates that ID. If an interrupted creation has an unknown
+outcome, inspect your Workshop before creating another item. Complete any
+requested legal agreement yourself. After enabling file transfer, restarting
+Steam may be needed to refresh its cached Workshop depot configuration.
+
+For installation/update and subscription callback coverage, change the probe
+and upload the next revision of the same item, then exercise it:
+
+```sh
+node test/workshop-private-item.js revise APP_ID .workshop-smoke/APP_ID
+node test/workshop-private-item.js upload APP_ID .workshop-smoke/APP_ID
+node test/workshop-private-item.js exercise APP_ID .workshop-smoke/APP_ID
+```
+
+`exercise` registers callbacks before requesting content, checks the installed
+probe's SHA-256, briefly subscribes if needed, and restores the original
+subscription state. It records which events actually arrived in `project.json`.
+It can also run with Electron in Node mode. Keep the project folder to reuse
+the item; it is ignored by Git and excluded from the npm package.
+
 ## Installation
 
 To use steamworks.js you don't have to build anything, just install it from npm:
